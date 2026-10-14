@@ -1,0 +1,44 @@
+func main() i32 {
+    return 40 + 2;
+}
+
+func Point::sum(self this, extra i32) i32 {
+    return self.x + extra;
+}
+
+func Box[T]::from(value T) Box[T] {
+    return value;
+}
+
+func Buf[N, T]::width() i32 {
+    return N;
+}
+
+func id[T type, ...U](value T, rest U) T {
+    var fp func (i32) i32 = id;
+    var wide = 2.5;
+    var narrow = 1.5f;
+    var hex = 0x1.8p1f;
+    var bits = 0b1010u32;
+    var n = 1'000i32;
+    var dot = .5;
+    var text *const u8 = `hello
+world`;
+    var raw *const u8 = `a\n"b`;
+    if (text[0] != 'h' || text[5] != '\n' || text[1] != '\\' || text[2] != '\x41') {
+        return 1;
+    }
+    n <<= 1;
+    n >>= 2;
+    n += 1;
+    n %= 2;
+    n &= 3;
+    n |= 4;
+    n ^= 5;
+    // comment
+    /* block */
+    type Box[T type] struct {
+        value T;
+    }
+    type PairFn func (i32) (i32, i32);
+}

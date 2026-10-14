@@ -3,11 +3,23 @@
   "version": "0.1.0",
   "description": "Tree-sitter grammar for the TLC language",
   "main": "bindings/node",
+  "scripts": {
+    "generate": "tree-sitter generate",
+    "test": "node test/check.js"
+  },
   "tree-sitter": [
     {
       "scope": "source.tlc",
-      "file-types": ["tlc"]
+      "file-types": [
+        "tlc"
+      ]
     }
   ],
-  "license": "MIT"
+  "devDependencies": {
+    "tree-sitter-cli": "0.25.8"
+  },
+  "license": "MIT",
+  "allowScripts": {
+    "tree-sitter-cli@0.25.8": true
+  }
 }

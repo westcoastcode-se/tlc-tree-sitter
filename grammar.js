@@ -1,5 +1,8 @@
-// A small grammar for opening and running TLC files in Zed.
-// It tokenizes the file and keeps function and type names as real nodes.
+// Token grammar for TLC.
+// The words and the literal shapes match the compiler lexer
+// (tlc-lang/src/lexer.cpp) and the token section of docs/grammar.md.
+// It is not a statement parser. It keeps `func` and `type` names as nodes
+// so an editor can list them and can run `main`.
 
 const BUILTIN_TYPES = [
   "bool",
@@ -16,37 +19,79 @@ const BUILTIN_TYPES = [
   "f64",
 ];
 
+// `bool` and `void` are keywords in the lexer and built-in types in the editor.
+// `func` and `type` are handled below, because a following name is a declaration.
 const KEYWORDS = [
-  "var",
-  "const",
-  "struct",
-  "enum",
-  "union",
-  "trait",
-  "if",
-  "else",
-  "while",
-  "for",
-  "do",
-  "switch",
-  "case",
-  "default",
-  "return",
+  "_Alignas",
+  "_Alignof",
+  "_Atomic",
+  "_BitInt",
+  "_Bool",
+  "_Complex",
+  "_Decimal128",
+  "_Decimal32",
+  "_Decimal64",
+  "_Generic",
+  "_Imaginary",
+  "_Noreturn",
+  "_Static_assert",
+  "_Thread_local",
+  "alignas",
+  "alignof",
+  "assert",
+  "auto",
   "break",
+  "case",
+  "const",
+  "constexpr",
   "continue",
+  "default",
   "defer",
-  "import",
-  "package",
+  "do",
+  "else",
+  "enum",
   "export",
   "extern",
-  "test",
-  "assert",
-  "sizeof",
-  "typeof",
-  "true",
   "false",
+  "for",
+  "goto",
+  "if",
+  "import",
+  "inline",
   "null",
+  "package",
+  "register",
+  "restrict",
+  "return",
+  "sizeof",
+  "static_assert",
+  "struct",
+  "switch",
+  "test",
+  "thread_local",
+  "trait",
+  "true",
+  "typeof",
+  "typeof_unqual",
+  "union",
+  "var",
+  "volatile",
+  "while",
 ];
+
+// A `'` between digits is a separator. The piece after it must be a digit.
+const DEC = /[0-9]([0-9]|'[0-9])*/;
+const HEX = /[0-9a-fA-F]([0-9a-fA-F]|'[0-9a-fA-F])*/;
+const INT_SUFFIX = /(i8|i16|i32|i64|u8|u16|u32|u64)/;
+const EXP = /[eE][+-]?[0-9]([0-9]|'[0-9])*/;
+const BIN_EXP = /[pP][+-]?[0-9]([0-9]|'[0-9])*/;
+const FLOAT_SUFFIX = /[fF]/;
+
+const ESCAPE = choice(
+  /\\x[0-9a-fA-F]+/,
+  /\\[0-7]{1,3}/,
+  /\\./,
+);
 
 module.exports = grammar({
   name: "tlc",
@@ -72,10 +117,24 @@ module.exports = grammar({
         $.punctuation,
       ),
 
+    // `func name` and `func Type::name`.
+    // `func Type[T]::name` stays a plain `func Type`; the brackets are tokens.
+    // A bracket list can contain the keyword `type` (`func id[T type]`), and
+    // folding that list into this rule makes `type` fail to lex.
+    // `func (` is a function type, so `func` is then only a keyword.
     function_definition: ($) =>
-      seq("func", field("name", $.identifier)),
+      choice(
+        prec(2, seq("func", field("type", $.identifier), "::", field("name", $.identifier))),
+        prec(1, seq("func", field("name", $.identifier))),
+        prec(0, alias("func", $.keyword)),
+      ),
 
-    type_definition: ($) => seq("type", field("name", $.identifier)),
+    // `type Name`. A bare `type`, as in `T type`, is a keyword.
+    type_definition: ($) =>
+      choice(
+        prec(1, seq("type", field("name", $.identifier))),
+        prec(0, alias("type", $.keyword)),
+      ),
 
     comment: ($) =>
       token(
@@ -86,12 +145,32 @@ module.exports = grammar({
       ),
 
     string: ($) =>
-      token(seq('"', repeat(choice(/[^"\\\n]/, /\\./)), '"')),
+      token(
+        choice(
+          seq('"', repeat(choice(/[^"\\\n]/, ESCAPE)), '"'),
+          seq("`", repeat(/[^`]/), "`"),
+        ),
+      ),
 
-    character: ($) =>
-      token(seq("'", choice(/[^'\\\n]/, /\\./), "'")),
+    character: ($) => token(seq("'", choice(/[^'\\\n]/, ESCAPE), "'")),
 
-    number: ($) => token(/[0-9][0-9a-zA-Z_]*/),
+    // Longer literals are listed first. The lexer still picks the longest match.
+    number: ($) =>
+      token(
+        choice(
+          seq(/0[xX]/, HEX, ".", HEX, BIN_EXP, optional(FLOAT_SUFFIX)),
+          seq(/0[xX]/, HEX, BIN_EXP, optional(FLOAT_SUFFIX)),
+          seq(/0[xX]/, ".", HEX, BIN_EXP, optional(FLOAT_SUFFIX)),
+          seq(DEC, ".", DEC, optional(EXP), optional(FLOAT_SUFFIX)),
+          seq(DEC, ".", EXP, optional(FLOAT_SUFFIX)),
+          seq(DEC, EXP, optional(FLOAT_SUFFIX)),
+          seq(".", DEC, optional(EXP), optional(FLOAT_SUFFIX)),
+          seq(/0[bB][01]([01]|'[01])*/, optional(INT_SUFFIX)),
+          seq(/0[xX]/, HEX, optional(INT_SUFFIX)),
+          seq(/0[0-7]([0-7]|'[0-7])*/, optional(INT_SUFFIX)),
+          seq(DEC, optional(INT_SUFFIX)),
+        ),
+      ),
 
     builtin_type: ($) => choice(...BUILTIN_TYPES),
 
@@ -101,6 +180,10 @@ module.exports = grammar({
 
     operator: ($) =>
       choice(
+        "...",
+        "::",
+        "<<=",
+        ">>=",
         ":=",
         "==",
         "!=",
@@ -117,6 +200,10 @@ module.exports = grammar({
         "-=",
         "*=",
         "/=",
+        "%=",
+        "&=",
+        "|=",
+        "^=",
         "+",
         "-",
         "*",

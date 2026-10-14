@@ -10,7 +10,17 @@
     "fields": {
       "name": {
         "multiple": false,
-        "required": true,
+        "required": false,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          }
+        ]
+      },
+      "type": {
+        "multiple": false,
+        "required": false,
         "types": [
           {
             "type": "identifier",
@@ -18,6 +28,16 @@
           }
         ]
       }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "keyword",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -93,7 +113,7 @@
     "fields": {
       "name": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "identifier",
@@ -101,6 +121,16 @@
           }
         ]
       }
+    },
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "keyword",
+          "named": true
+        }
+      ]
     }
   },
   {
@@ -116,11 +146,19 @@
     "named": false
   },
   {
+    "type": "%=",
+    "named": false
+  },
+  {
     "type": "&",
     "named": false
   },
   {
     "type": "&&",
+    "named": false
+  },
+  {
+    "type": "&=",
     "named": false
   },
   {
@@ -176,6 +214,10 @@
     "named": false
   },
   {
+    "type": "...",
+    "named": false
+  },
+  {
     "type": "/",
     "named": false
   },
@@ -185,6 +227,10 @@
   },
   {
     "type": ":",
+    "named": false
+  },
+  {
+    "type": "::",
     "named": false
   },
   {
@@ -201,6 +247,10 @@
   },
   {
     "type": "<<",
+    "named": false
+  },
+  {
+    "type": "<<=",
     "named": false
   },
   {
@@ -228,6 +278,10 @@
     "named": false
   },
   {
+    "type": ">>=",
+    "named": false
+  },
+  {
     "type": "?",
     "named": false
   },
@@ -244,7 +298,79 @@
     "named": false
   },
   {
+    "type": "^=",
+    "named": false
+  },
+  {
+    "type": "_Alignas",
+    "named": false
+  },
+  {
+    "type": "_Alignof",
+    "named": false
+  },
+  {
+    "type": "_Atomic",
+    "named": false
+  },
+  {
+    "type": "_BitInt",
+    "named": false
+  },
+  {
+    "type": "_Bool",
+    "named": false
+  },
+  {
+    "type": "_Complex",
+    "named": false
+  },
+  {
+    "type": "_Decimal128",
+    "named": false
+  },
+  {
+    "type": "_Decimal32",
+    "named": false
+  },
+  {
+    "type": "_Decimal64",
+    "named": false
+  },
+  {
+    "type": "_Generic",
+    "named": false
+  },
+  {
+    "type": "_Imaginary",
+    "named": false
+  },
+  {
+    "type": "_Noreturn",
+    "named": false
+  },
+  {
+    "type": "_Static_assert",
+    "named": false
+  },
+  {
+    "type": "_Thread_local",
+    "named": false
+  },
+  {
+    "type": "alignas",
+    "named": false
+  },
+  {
+    "type": "alignof",
+    "named": false
+  },
+  {
     "type": "assert",
+    "named": false
+  },
+  {
+    "type": "auto",
     "named": false
   },
   {
@@ -270,6 +396,10 @@
   },
   {
     "type": "const",
+    "named": false
+  },
+  {
+    "type": "constexpr",
     "named": false
   },
   {
@@ -325,6 +455,10 @@
     "named": false
   },
   {
+    "type": "goto",
+    "named": false
+  },
+  {
     "type": "i16",
     "named": false
   },
@@ -353,6 +487,10 @@
     "named": false
   },
   {
+    "type": "inline",
+    "named": false
+  },
+  {
     "type": "null",
     "named": false
   },
@@ -365,6 +503,14 @@
     "named": false
   },
   {
+    "type": "register",
+    "named": false
+  },
+  {
+    "type": "restrict",
+    "named": false
+  },
+  {
     "type": "return",
     "named": false
   },
@@ -373,7 +519,7 @@
     "named": false
   },
   {
-    "type": "static",
+    "type": "static_assert",
     "named": false
   },
   {
@@ -393,6 +539,10 @@
     "named": false
   },
   {
+    "type": "thread_local",
+    "named": false
+  },
+  {
     "type": "trait",
     "named": false
   },
@@ -406,6 +556,10 @@
   },
   {
     "type": "typeof",
+    "named": false
+  },
+  {
+    "type": "typeof_unqual",
     "named": false
   },
   {
@@ -437,6 +591,10 @@
     "named": false
   },
   {
+    "type": "volatile",
+    "named": false
+  },
+  {
     "type": "while",
     "named": false
   },
@@ -446,6 +604,10 @@
   },
   {
     "type": "|",
+    "named": false
+  },
+  {
+    "type": "|=",
     "named": false
   },
   {

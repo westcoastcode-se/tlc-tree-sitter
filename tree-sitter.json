@@ -14,7 +14,7 @@
     "license": "MIT",
     "description": "Tree-sitter grammar for TLC",
     "links": {
-      "repository": "https://example.invalid/tlc"
+      "repository": "https://github.com/westcoastcode-se/tlc-tree-sitter"
     }
   },
   "bindings": {
