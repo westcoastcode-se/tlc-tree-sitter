@@ -801,6 +801,10 @@
         },
         {
           "type": "STRING",
+          "value": "delete"
+        },
+        {
+          "type": "STRING",
           "value": "do"
         },
         {
@@ -842,6 +846,10 @@
         {
           "type": "STRING",
           "value": "inline"
+        },
+        {
+          "type": "STRING",
+          "value": "new"
         },
         {
           "type": "STRING",

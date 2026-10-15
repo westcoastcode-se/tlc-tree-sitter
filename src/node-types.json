@@ -415,6 +415,10 @@
     "named": false
   },
   {
+    "type": "delete",
+    "named": false
+  },
+  {
     "type": "do",
     "named": false
   },
@@ -488,6 +492,10 @@
   },
   {
     "type": "inline",
+    "named": false
+  },
+  {
+    "type": "new",
     "named": false
   },
   {
