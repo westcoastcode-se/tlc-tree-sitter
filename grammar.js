@@ -76,6 +76,7 @@ const KEYWORDS = [
   "typeof",
   "typeof_unqual",
   "union",
+  "unsafe",
   "var",
   "volatile",
   "while",

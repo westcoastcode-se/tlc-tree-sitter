@@ -591,6 +591,10 @@
     "named": false
   },
   {
+    "type": "unsafe",
+    "named": false
+  },
+  {
     "type": "var",
     "named": false
   },
