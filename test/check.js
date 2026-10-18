@@ -5,13 +5,21 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const cli = path.join(root, "node_modules", ".bin", "tree-sitter");
 
+function run(args) {
+  return spawnSync(cli, args, { encoding: "utf8", cwd: root });
+}
+
 function parse(file) {
-  const result = spawnSync(cli, ["parse", file], { encoding: "utf8" });
+  const result = run(["parse", file]);
   const out = `${result.stdout || ""}\n${result.stderr || ""}`;
   if (result.status !== 0 || out.includes("(ERROR") || out.includes("(MISSING")) {
     return out;
   }
   return null;
+}
+
+function cst(file) {
+  return run(["parse", file, "--cst"]).stdout || "";
 }
 
 function walk(dir, files) {
@@ -36,19 +44,50 @@ if (shapesError) {
   failed += 1;
 }
 
-const query = spawnSync(cli, ["query", path.join(root, "test", "names.scm"), shapes], {
-  encoding: "utf8",
-});
+const query = run(["query", path.join(root, "test", "names.scm"), shapes]);
 if (query.status !== 0) {
   console.error(query.stderr || query.stdout);
   failed += 1;
 }
 const names = query.stdout || "";
-for (const text of ["main", "sum", "id", "Point", "Box"]) {
+for (const text of ["main", "sum", "from", "width", "id", "Point", "Box"]) {
   if (!names.includes("text: `" + text + "`")) {
     console.error("missing capture: " + text);
     failed += 1;
   }
+}
+
+const shapeTree = cst(shapes);
+for (const text of ["1.", "1.f", "10.F", "1'000.", "0x1.p1", "0xAB.p-2f", "0x1.P1"]) {
+  if (!shapeTree.includes("number `" + text + "`")) {
+    console.error("missing number: " + text);
+    failed += 1;
+  }
+}
+if (shapeTree.includes("number `0.`") || shapeTree.includes("number `0...`")) {
+  console.error("ellipsis was absorbed into a float");
+  failed += 1;
+}
+if (!shapeTree.includes('"..."')) {
+  console.error("missing ellipsis");
+  failed += 1;
+}
+if (!shapeTree.includes("comment `// comment`") || !shapeTree.includes("comment `/* block */`")) {
+  console.error("comment was not a comment");
+  failed += 1;
+}
+
+const unclosed = path.join(root, "test", "unclosed.tlc");
+const unclosedError = parse(unclosed);
+if (unclosedError) {
+  console.error(unclosedError);
+  failed += 1;
+}
+const unclosedTree = cst(unclosed);
+if (!unclosedTree.includes("`/* still") || unclosedTree.includes("number `2`")) {
+  console.error("unterminated block comment was not consumed");
+  console.error(unclosedTree);
+  failed += 1;
 }
 
 const compiler = path.resolve(root, "..", "tlc-lang");

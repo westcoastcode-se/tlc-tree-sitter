@@ -42,3 +42,13 @@ world`;
     }
     type PairFn func (i32) (i32, i32);
 }
+
+var trail = 1.;
+var trailf = 1.f;
+var trailF = 10.F;
+var grouped = 1'000.;
+var hexdot = 0x1.p1;
+var hexsigned = 0xAB.p-2f;
+var hexupper = 0x1.P1;
+var spread = 0...;
+var rest = {10, 20, 0...};

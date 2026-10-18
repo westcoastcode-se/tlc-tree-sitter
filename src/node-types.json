@@ -30,11 +30,27 @@
       }
     },
     "children": {
-      "multiple": false,
+      "multiple": true,
       "required": false,
       "types": [
         {
+          "type": "builtin_type",
+          "named": true
+        },
+        {
+          "type": "identifier",
+          "named": true
+        },
+        {
           "type": "keyword",
+          "named": true
+        },
+        {
+          "type": "number",
+          "named": true
+        },
+        {
+          "type": "operator",
           "named": true
         }
       ]
@@ -42,6 +58,11 @@
   },
   {
     "type": "keyword",
+    "named": true,
+    "fields": {}
+  },
+  {
+    "type": "number",
     "named": true,
     "fields": {}
   },
@@ -501,10 +522,6 @@
   {
     "type": "null",
     "named": false
-  },
-  {
-    "type": "number",
-    "named": true
   },
   {
     "type": "package",

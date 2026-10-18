@@ -33,4 +33,4 @@ npx tree-sitter-cli@0.25.8 generate
 
 ## Limits
 
-A float written `1.` is two tokens here, a number and a dot. The compiler accepts that spelling as one float. `1.5` and `.5` are one number. A digit separator such as `1'000` is one number.
+`1.`, `1.f`, and `0x1.p1` are one number. `1.5` and `.5` are one number. A digit separator such as `1'000` is one number. `0...` is a number and `...`: the dot is not part of the float when another dot follows.

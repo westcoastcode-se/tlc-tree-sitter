@@ -101,7 +101,17 @@ module.exports = grammar({
 
   extras: ($) => [/\s/, $.comment],
 
+  // `//` and `/*` are one external token. An internal `/*` pattern cannot
+  // stop at the first `*/` and also reach the end of the file when `*/` is
+  // missing. The trailing-dot float is separate so `0...` stays a number
+  // and an ellipsis.
+  externals: ($) => [$.comment, $._float_trailing_dot],
+
   word: ($) => $.identifier,
+
+  // `func Type[T]::name` and `func name` share a prefix. Both parses stay so
+  // `func name[T type]` still treats `type` as a keyword.
+  conflicts: ($) => [[$.function_definition]],
 
   rules: {
     source_file: ($) => repeat($._token),
@@ -120,16 +130,46 @@ module.exports = grammar({
         $.punctuation,
       ),
 
-    // `func name` and `func Type::name`.
-    // `func Type[T]::name` stays a plain `func Type`; the brackets are tokens.
-    // A bracket list can contain the keyword `type` (`func id[T type]`), and
-    // folding that list into this rule makes `type` fail to lex.
-    // `func (` is a function type, so `func` is then only a keyword.
+    // `func name`, `func Type::name`, and `func Type[T]::name`.
+    // Brackets before `::` stay in this rule so the name is the method, not the type.
+    // `func name[T type]` has the same prefix and no `::` after the brackets.
+    // Both stay, at the same precedence, so `type` is still a keyword there.
+    // Dynamic precedence keeps the method name when `::` is present.
+    // The brackets are not one token. `func (` is a function type, so `func`
+    // is then only a keyword.
     function_definition: ($) =>
       choice(
+        prec.dynamic(
+          1,
+          prec(
+            1,
+            seq(
+              "func",
+              field("type", $.identifier),
+              "[",
+              repeat($._type_parameter),
+              "]",
+              "::",
+              field("name", $.identifier),
+            ),
+          ),
+        ),
         prec(2, seq("func", field("type", $.identifier), "::", field("name", $.identifier))),
         prec(1, seq("func", field("name", $.identifier))),
         prec(0, alias("func", $.keyword)),
+      ),
+
+    // A type-parameter list on a method: `Vec[T]`, `Buf[N, T]`, `Box[T type]`.
+    _type_parameter: ($) =>
+      choice(
+        $.identifier,
+        $.number,
+        $.builtin_type,
+        $.keyword,
+        alias("type", $.keyword),
+        $.operator,
+        ",",
+        seq("[", repeat($._type_parameter), "]"),
       ),
 
     // `type Name`. A bare `type`, as in `T type`, is a keyword.
@@ -137,14 +177,6 @@ module.exports = grammar({
       choice(
         prec(1, seq("type", field("name", $.identifier))),
         prec(0, alias("type", $.keyword)),
-      ),
-
-    comment: ($) =>
-      token(
-        choice(
-          seq("//", /.*/),
-          seq("/*", /[^*]*\*+([^/*][^*]*\*+)*/, "/"),
-        ),
       ),
 
     string: ($) =>
@@ -158,20 +190,26 @@ module.exports = grammar({
     character: ($) => token(seq("'", choice(/[^'\\\n]/, ESCAPE), "'")),
 
     // Longer literals are listed first. The lexer still picks the longest match.
+    // `1.` is external: a regex cannot see that the next character is not `.`.
     number: ($) =>
-      token(
-        choice(
-          seq(/0[xX]/, HEX, ".", HEX, BIN_EXP, optional(FLOAT_SUFFIX)),
-          seq(/0[xX]/, HEX, BIN_EXP, optional(FLOAT_SUFFIX)),
-          seq(/0[xX]/, ".", HEX, BIN_EXP, optional(FLOAT_SUFFIX)),
-          seq(DEC, ".", DEC, optional(EXP), optional(FLOAT_SUFFIX)),
-          seq(DEC, ".", EXP, optional(FLOAT_SUFFIX)),
-          seq(DEC, EXP, optional(FLOAT_SUFFIX)),
-          seq(".", DEC, optional(EXP), optional(FLOAT_SUFFIX)),
-          seq(/0[bB][01]([01]|'[01])*/, optional(INT_SUFFIX)),
-          seq(/0[xX]/, HEX, optional(INT_SUFFIX)),
-          seq(/0[0-7]([0-7]|'[0-7])*/, optional(INT_SUFFIX)),
-          seq(DEC, optional(INT_SUFFIX)),
+      choice(
+        $._float_trailing_dot,
+        token(
+          choice(
+            seq(/0[xX]/, HEX, ".", HEX, BIN_EXP, optional(FLOAT_SUFFIX)),
+            seq(/0[xX]/, HEX, ".", BIN_EXP, optional(FLOAT_SUFFIX)),
+            seq(/0[xX]/, HEX, BIN_EXP, optional(FLOAT_SUFFIX)),
+            seq(/0[xX]/, ".", HEX, BIN_EXP, optional(FLOAT_SUFFIX)),
+            seq(DEC, ".", DEC, optional(EXP), optional(FLOAT_SUFFIX)),
+            seq(DEC, ".", EXP, optional(FLOAT_SUFFIX)),
+            seq(DEC, ".", FLOAT_SUFFIX),
+            seq(DEC, EXP, optional(FLOAT_SUFFIX)),
+            seq(".", DEC, optional(EXP), optional(FLOAT_SUFFIX)),
+            seq(/0[bB][01]([01]|'[01])*/, optional(INT_SUFFIX)),
+            seq(/0[xX]/, HEX, optional(INT_SUFFIX)),
+            seq(/0[0-7]([0-7]|'[0-7])*/, optional(INT_SUFFIX)),
+            seq(DEC, optional(INT_SUFFIX)),
+          ),
         ),
       ),
 
