@@ -90,10 +90,15 @@ const EXP = /[eE][+-]?[0-9]([0-9]|'[0-9])*/;
 const BIN_EXP = /[pP][+-]?[0-9]([0-9]|'[0-9])*/;
 const FLOAT_SUFFIX = /[fF]/;
 
+// A backslash and the character it escapes. Hex and octal escapes are longer
+// than one character, so the lexer keeps every hex digit and up to three
+// octal digits. A `\` at end of file, or right before a newline, stays in the
+// literal. That newline is not the escaped character.
 const ESCAPE = choice(
   /\\x[0-9a-fA-F]+/,
   /\\[0-7]{1,3}/,
-  /\\./,
+  /\\[^\n]/,
+  /\\/,
 );
 
 module.exports = grammar({
@@ -179,15 +184,30 @@ module.exports = grammar({
         prec(0, alias("type", $.keyword)),
       ),
 
+    // A missing closer does not split the literal. A quoted string stops before
+    // a newline. A raw string runs to the end of the file. The closed form is
+    // longer, so a present closer stays inside the token.
     string: ($) =>
       token(
         choice(
           seq('"', repeat(choice(/[^"\\\n]/, ESCAPE)), '"'),
+          seq('"', repeat(choice(/[^"\\\n]/, ESCAPE))),
           seq("`", repeat(/[^`]/), "`"),
+          seq("`", repeat(/[^`]/)),
         ),
       ),
 
-    character: ($) => token(seq("'", choice(/[^'\\\n]/, ESCAPE), "'")),
+    // `''` is one character. `'ab'` is `'a`, then `b`, then `'`. An unclosed
+    // constant is still one character token, including a truncated escape.
+    character: ($) =>
+      token(
+        choice(
+          seq("'", choice(ESCAPE, /[^'\\\n]/), "'"),
+          seq("'", choice(ESCAPE, /[^'\\\n]/)),
+          "''",
+          "'",
+        ),
+      ),
 
     // Longer literals are listed first. The lexer still picks the longest match.
     // `1.` is external: a regex cannot see that the next character is not `.`.

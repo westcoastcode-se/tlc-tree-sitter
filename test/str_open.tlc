@@ -1,0 +1,4 @@
+var a = "unterminated
+var b = 2;
+var c = "foo\
+var d = 3;

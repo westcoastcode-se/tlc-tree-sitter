@@ -33,4 +33,4 @@ npx tree-sitter-cli@0.25.8 generate
 
 ## Limits
 
-`1.`, `1.f`, and `0x1.p1` are one number. `1.5` and `.5` are one number. A digit separator such as `1'000` is one number. `0...` is a number and `...`: the dot is not part of the float when another dot follows.
+`1.`, `1.f`, and `0x1.p1` are one number. `1.5` and `.5` are one number. A digit separator such as `1'000` is one number. `0...` is a number and `...`: the dot is not part of the float when another dot follows. A literal the compiler keeps as one token and then rejects, such as `1e`, `0x`, `0b12`, or `1u32x`, is still one number. A `#` line and a `\` are skipped, matching the lexer. `''` is one character. `'ab'` is a character, an identifier, and a character. An unclosed quoted string stops before the newline. An unclosed raw string runs to the end of the file.

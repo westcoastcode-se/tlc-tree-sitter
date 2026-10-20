@@ -1,0 +1,11 @@
+1e 1e+ 1.e 1.e+ .5e2 0e1
+0x1. 0x1.f 0x.p1 0x 0x1'fp1 0x1ep1
+0b 0b12 0b1.2 1u32x 1u 1'000 1u32 08
+1'.5 1''e5 0x1''2p1 1.foo 1.5f
+0...
+#include <stdio.h>
+#define X \
+1
+var kept = 2;
+var y = 1 # 2;
+\u0041
