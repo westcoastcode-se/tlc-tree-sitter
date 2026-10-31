@@ -190,9 +190,9 @@ module.exports = grammar({
     string: ($) =>
       token(
         choice(
-          seq('"', repeat(choice(/[^"\\\n]/, ESCAPE)), '"'),
+          seq('"', repeat(choice(/[^"\\\n]/, ESCAPE)), '"', optional("b")),
           seq('"', repeat(choice(/[^"\\\n]/, ESCAPE))),
-          seq("`", repeat(/[^`]/), "`"),
+          seq("`", repeat(/[^`]/), "`", optional("b")),
           seq("`", repeat(/[^`]/)),
         ),
       ),
@@ -202,7 +202,7 @@ module.exports = grammar({
     character: ($) =>
       token(
         choice(
-          seq("'", choice(ESCAPE, /[^'\\\n]/), "'"),
+          seq("'", choice(ESCAPE, /[^'\\\n]/), "'", optional("b")),
           seq("'", choice(ESCAPE, /[^'\\\n]/)),
           "''",
           "'",
