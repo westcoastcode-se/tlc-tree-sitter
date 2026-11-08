@@ -480,10 +480,6 @@
     "named": false
   },
   {
-    "type": "goto",
-    "named": false
-  },
-  {
     "type": "i16",
     "named": false
   },

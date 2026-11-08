@@ -1118,10 +1118,6 @@
         },
         {
           "type": "STRING",
-          "value": "goto"
-        },
-        {
-          "type": "STRING",
           "value": "if"
         },
         {
